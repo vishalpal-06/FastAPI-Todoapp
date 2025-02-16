@@ -3,3 +3,15 @@ A FastAPI Todo App is a simple, efficient, and lightweight task management appli
 
 conflict test
 4
+
+
+
+
+{
+  "username": "vishal",
+  "email": "vishalpal@gmail.com",
+  "first_name": "vishal kumar",
+  "last_name": "pal",
+  "password": "vishal@06",
+  "role": "admin"
+}

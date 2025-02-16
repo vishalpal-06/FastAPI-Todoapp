@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn[standard]
+sqlalchemy==2.0.27
+pydantic==2.6.3
+passlib[bcrypt]
+python-jose>=3.0.0
+
+
+# install dependency -> pip install -r requirements.txt
