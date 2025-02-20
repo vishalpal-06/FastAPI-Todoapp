@@ -11,7 +11,7 @@ from datetime import timedelta, datetime, timezone
 from pydantic import BaseModel
 
 
-route = APIRouter(
+router = APIRouter(
     prefix='/auth',
     tags=['Auth']
 )
@@ -80,7 +80,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
 
 
 
-@route.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_requiest: CreateUserRequest):
     create_user_model = Users(
         email=create_user_requiest.email,
@@ -97,7 +97,7 @@ async def create_user(db: db_dependency, create_user_requiest: CreateUserRequest
 
 
 
-@route.post("/token", response_model=Token)
+@router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
