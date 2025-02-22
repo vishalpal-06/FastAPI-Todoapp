@@ -1,8 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
-from main import app
-
-client = TestClient(app)
+from tests.utils import client
 
 def test_health_check():
     response = client.get("/health/")

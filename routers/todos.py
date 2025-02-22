@@ -26,7 +26,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 # Get all record from database
-@router.get("/all", status_code=status.HTTP_200_OK)
+@router.get("/all/", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')
@@ -49,7 +49,7 @@ async def read_todo(user: user_dependency, db: db_dependency,todo_id: int = Path
 
 
 #
-@router.post("/todo", status_code=status.HTTP_201_CREATED)
+@router.post("/todo/", status_code=status.HTTP_201_CREATED)
 async def create_todo(user: user_dependency, db: db_dependency, todo_request: TodoRequest):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')

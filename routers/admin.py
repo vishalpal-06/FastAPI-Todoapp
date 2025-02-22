@@ -28,15 +28,15 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @router.get("/all_todos", status_code=status.HTTP_200_OK)
-def read_todos(user:user_dependency, db:db_dependency):
+def read_all_todos(user:user_dependency, db:db_dependency):
     if user is None or user.get('user_role') != 'admin':
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate User As Admin.")
     return db.query(Todos).all()
 
 
 
-@router.get("/all_users", status_code=status.HTTP_200_OK)
-async def read_users(user:user_dependency, db: db_dependency):
+@router.get("/read_all_users/", status_code=status.HTTP_200_OK)
+async def read_all_users(user:user_dependency, db: db_dependency):
     if user is None or user.get('user_role') != 'admin':
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate User As Admin.")
     return db.query(Users).all()
@@ -59,8 +59,8 @@ async def delete_user(user: user_dependency, db: db_dependency, user_id: int = P
     if user is None or user.get('user_role') != 'admin':
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate User As Admin.")
     todo_model = db.query(Users).filter(Users.id == user_id).first()
-    print(todo_model)
     if todo_model is None:
         raise HTTPException(status_code=404, detail="User Id not found in database")
     db.query(Users).filter(Users.id == user_id).delete()
+    db.query(Todos).filter(Todos.owner_id == user_id).delete()
     db.commit()
