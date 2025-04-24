@@ -4,6 +4,7 @@ sqlalchemy==2.0.27
 pydantic==2.6.3
 passlib[bcrypt]
 python-jose>=3.0.0
-
+azure-identity
+azure-storage-blob
 
 # install dependency -> pip install -r requirements.txt
