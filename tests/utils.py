@@ -2,12 +2,12 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import StaticPool
-from database import Base
+from utils.database import Base
 from main import app
 from routers.todos import get_db, get_current_user
 from fastapi.testclient import TestClient
 from main import app
-from models import Users, Todos
+from utils.models import Users, Todos
 from routers.auth import bcrypt_context
 import pytest
 

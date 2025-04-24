@@ -3,7 +3,7 @@ from fastapi import status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from tests.utils import client,TestingSessionLocal,test_todo
-from models import Todos
+from utils.models import Todos
 
 
 def test_create_todo(test_todo):

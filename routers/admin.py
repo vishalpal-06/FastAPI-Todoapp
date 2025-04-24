@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status
-from database import sessionlocal
-from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, Path, status, Body
+from utils.database import sessionlocal
+from typing import Annotated,Optional,Literal
+from pydantic import BaseModel, EmailStr, Field, constr
 from sqlalchemy.orm import Session
-from models import Todos
-from schema.tables_schema import TodoRequest
+from utils.models import Todos
+from schema.tables_schema import CreateUserRequest
 from .auth import get_current_user
-from models import Users
-
+from utils.models import Users
+from passlib.hash import bcrypt
 
 router = APIRouter(
     prefix='/admin',
@@ -64,3 +65,75 @@ async def delete_user(user: user_dependency, db: db_dependency, user_id: int = P
     db.query(Users).filter(Users.id == user_id).delete()
     db.query(Todos).filter(Todos.owner_id == user_id).delete()
     db.commit()
+
+
+class UpdateUserRequest(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role: Optional[str] = None
+
+
+@router.put("/user/{user_id}", status_code=status.HTTP_200_OK)
+async def update_user(
+    user: user_dependency,
+    db: db_dependency,
+    user_id: int = Path(gt=0),
+    user_update: UpdateUserRequest = Body(...)
+):
+    if user is None or user.get('user_role') != 'admin':
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate User As Admin.")
+    
+    user_model = db.query(Users).filter(Users.id == user_id).first()
+    if user_model is None:
+        raise HTTPException(status_code=404, detail="User Id not found in database")
+    
+    # Update only provided fields
+    update_data = user_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user_model, key, value)
+    
+    db.add(user_model)
+    db.commit()
+    db.refresh(user_model)
+
+
+
+
+@router.post("/user", status_code=status.HTTP_201_CREATED)
+async def create_user(
+    user: user_dependency,
+    db: db_dependency,
+    new_user: CreateUserRequest = Body(...)
+):
+    if user is None or user.get("user_role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Only admins can create users."
+        )
+
+    # Check if email or username already exists
+    existing_user = db.query(Users).filter(
+        (Users.email == new_user.email) | (Users.username == new_user.username)
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email or username already exists."
+        )
+
+    # Create new user
+    user_model = Users(
+        email=new_user.email,
+        username=new_user.username,
+        first_name=new_user.first_name,
+        last_name=new_user.last_name,
+        role=new_user.role,
+        hashed_password=bcrypt.hash(new_user.password)
+    )
+
+    db.add(user_model)
+    db.commit()
+    db.refresh(user_model)
